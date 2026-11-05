@@ -7,27 +7,3 @@
 body {
   font-family: var(--font-lexend), Arial, Helvetica, sans-serif;
 }
-
-.leaflet-marker-icon.count-marker {
-  background-color: #2563eb;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px rgb(15 23 42 / 0.25);
-  box-sizing: border-box;
-}
-
-.leaflet-container {
-  background: #f8fafc;
-  font-family: var(--font-lexend), Arial, Helvetica, sans-serif;
-}
-
-.leaflet-popup-content-wrapper {
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgb(15 23 42 / 0.12);
-}
-
-.leaflet-popup-content {
-  margin: 10px 14px;
-  color: #0f172a;
-  font-family: var(--font-lexend), Arial, Helvetica, sans-serif;
-}

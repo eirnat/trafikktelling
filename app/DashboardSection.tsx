@@ -26,8 +26,8 @@ type DashboardHandle = {
 
 const FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
-const CARD = "rounded-2xl border border-slate-200 bg-white shadow-sm";
-const NOTICE = "rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-600";
+const CARD = "rounded-lg border border-slate-200 bg-white shadow-sm";
+const NOTICE = "rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-600";
 
 function shareLabel(count: number, total: number) {
   if (total === 0) return "0 %";
@@ -212,10 +212,10 @@ export function DashboardSection() {
             id="dashboard-heading"
             className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl"
           >
-            Kart og statistikk
+            Statistikk
           </h2>
           <p className="mt-2 max-w-2xl text-base text-slate-600">
-            Nøkkeltall, kart og diagrammer følger perioden du velger. CSV-filen
+            Nøkkeltall og diagrammer følger perioden du velger. CSV-filen
             inneholder de samme tellingene.
           </p>
         </div>
@@ -224,7 +224,7 @@ export function DashboardSection() {
 
         {status === "error" ? (
           <p
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-900"
+            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-900"
             role="alert"
           >
             Klarte ikke å hente tellinger fra regnearket.
@@ -238,7 +238,7 @@ export function DashboardSection() {
                 <div
                   role="radiogroup"
                   aria-label="Datoperiode"
-                  className="flex flex-wrap gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1"
+                  className="flex flex-wrap gap-1 rounded-md border border-slate-200 bg-slate-50 p-1"
                 >
                   {PERIOD_OPTIONS.map((option) => {
                     const active = periodId === option.id;
@@ -250,7 +250,7 @@ export function DashboardSection() {
                         aria-checked={active}
                         onClick={() => setPeriodId(option.id)}
                         className={
-                          `rounded-full px-3 py-2 text-sm font-semibold transition-colors ${FOCUS} ` +
+                          `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${FOCUS} ` +
                           (active
                             ? "bg-blue-600 text-white shadow-sm"
                             : "text-slate-600 hover:bg-white hover:text-slate-900")
@@ -267,7 +267,7 @@ export function DashboardSection() {
                   onClick={() =>
                     downloadCsv(csvFilename(period, filtered), rowsToCsv(filtered))
                   }
-                  className={`shrink-0 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600 ${FOCUS} disabled:cursor-not-allowed disabled:opacity-40`}
+                  className={`shrink-0 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600 ${FOCUS} disabled:cursor-not-allowed disabled:opacity-40`}
                 >
                   Last ned CSV ({filtered.length})
                 </button>
@@ -280,7 +280,7 @@ export function DashboardSection() {
                     type="date"
                     value={fromValue}
                     onChange={(event) => onFromChange(event.target.value)}
-                    className="mt-1 block rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900"
+                    className="mt-1 block rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900"
                   />
                 </label>
                 <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
@@ -289,7 +289,7 @@ export function DashboardSection() {
                     type="date"
                     value={toValue}
                     onChange={(event) => onToChange(event.target.value)}
-                    className="mt-1 block rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900"
+                    className="mt-1 block rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900"
                   />
                 </label>
                 <p className="pb-2 text-sm text-slate-500">{periodLabel}</p>
@@ -298,7 +298,7 @@ export function DashboardSection() {
               <div
                 role="radiogroup"
                 aria-label="Sted"
-                className="flex flex-wrap gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1"
+                className="flex flex-wrap gap-1 rounded-md border border-slate-200 bg-slate-50 p-1"
               >
                 {siteOptions.map((option) => {
                   const active = siteFilter === option.id;
@@ -310,7 +310,7 @@ export function DashboardSection() {
                       aria-checked={active}
                       onClick={() => setSiteFilter(option.id)}
                       className={
-                        `rounded-full px-3 py-2 text-sm font-semibold transition-colors ${FOCUS} ` +
+                        `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${FOCUS} ` +
                         (active
                           ? "bg-blue-600 text-white shadow-sm"
                           : "text-slate-600 hover:bg-white hover:text-slate-900")
@@ -403,22 +403,6 @@ export function DashboardSection() {
             ) : null}
 
             <div ref={rootRef} className="dashboard-root space-y-6">
-              <div className={`${CARD} overflow-hidden`}>
-                <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3">
-                  <h3 className="text-sm font-bold text-slate-900">Registrerte tellinger</h3>
-                  <p className="text-xs text-slate-500">
-                    {view.points.length === 0
-                      ? "Ingen posisjon"
-                      : `${view.points.length} med posisjon`}
-                  </p>
-                </div>
-                <div
-                  data-dashboard-map
-                  className="z-0 h-[min(520px,70vh)] w-full"
-                  role="presentation"
-                />
-              </div>
-
               <ChartCard label={view.bucketTitle}>
                 <canvas data-chart="time" aria-label={view.bucketTitle} />
               </ChartCard>

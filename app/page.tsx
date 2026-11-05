@@ -184,10 +184,10 @@ function readDraft(): Draft | null {
 
 function choiceClass(selected: boolean) {
   return (
-    "flex min-h-20 flex-col items-center justify-center rounded-2xl border-2 px-2 py-4 text-center font-semibold shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-40 " +
+    "flex min-h-20 flex-col items-center justify-center rounded-md border-2 px-2 py-3 text-center font-semibold shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-40 " +
     (selected
       ? "border-blue-600 bg-blue-600 text-white"
-      : "border-slate-200 bg-white text-slate-900 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md")
+      : "border-slate-200 bg-white text-slate-900 hover:border-blue-300")
   );
 }
 
@@ -388,7 +388,7 @@ export default function TrafikktellerPage() {
             <button
               type="button"
               onClick={byttSted}
-              className="shrink-0 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              className="shrink-0 rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               Bytt sted
             </button>
@@ -426,7 +426,7 @@ export default function TrafikktellerPage() {
         {site ? (
         <>
         <div
-          className="grid grid-cols-3 gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm"
+          className="grid grid-cols-3 gap-1 rounded-md border border-slate-200 bg-white p-1 shadow-sm"
           role="tablist"
           aria-label="Steg"
         >
@@ -444,7 +444,7 @@ export default function TrafikktellerPage() {
                 disabled={!open}
                 onClick={() => setStep(item.id)}
                 className={
-                  "rounded-full px-2 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed sm:text-sm " +
+                  "rounded-md px-2 py-2 text-xs font-semibold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed sm:text-sm " +
                   (active
                     ? "bg-blue-600 text-white shadow-sm"
                     : open
@@ -496,7 +496,7 @@ export default function TrafikktellerPage() {
               <label className="mt-6 block max-w-sm text-sm">
                 <span className="mb-1 block font-semibold text-slate-600">Andre land</span>
                 <select
-                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-3 text-base text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  className="w-full rounded-md border-2 border-slate-200 bg-white px-3 py-2 text-base text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   value={selectedCountry ?? ""}
                   onChange={velgLandDropdown}
                   aria-label="Velg land"
@@ -569,7 +569,7 @@ export default function TrafikktellerPage() {
 
         {sendError && (
           <div
-            className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+            className="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
             role="alert"
           >
             <p>{sendError}</p>
@@ -578,7 +578,7 @@ export default function TrafikktellerPage() {
                 type="button"
                 onClick={retrySend}
                 disabled={retrying}
-                className="mt-3 rounded-full border border-current px-4 py-2 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-3 rounded-md border border-current px-3 py-2 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {retrying ? "Sender" : "Prøv igjen"}
               </button>
@@ -595,7 +595,7 @@ export default function TrafikktellerPage() {
             <p className="min-w-0 flex-1 text-sm text-slate-600">{summary.join(" · ")}</p>
             <button
               type="button"
-              className="rounded-full bg-blue-600 px-6 py-4 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:shrink-0"
+              className="rounded-md bg-blue-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:shrink-0"
               onClick={sendData}
             >
               Bekreft og send

@@ -58,14 +58,6 @@ export type ResolvedPeriod = {
   incomplete: boolean;
 };
 
-export type MapPoint = {
-  lat: number;
-  lng: number;
-  landName: string;
-  typeLabel: string;
-  whenLabel: string;
-};
-
 export type ViewModel = {
   total: number;
   privat: number;
@@ -75,7 +67,6 @@ export type ViewModel = {
   topVehicleCount: number;
   countries: { name: string; count: number; share: number }[];
   carTypes: { label: string; count: number }[];
-  points: MapPoint[];
   buckets: { label: string; count: number }[];
   bucketTitle: string;
 };
@@ -248,14 +239,6 @@ function osloStamp(date: Date) {
   let hour = get("hour");
   if (hour === "24") hour = "00";
   return `${get("year")}-${get("month")}-${get("day")} ${hour}:${get("minute")}:${get("second")}`;
-}
-
-function whenLabel(date: Date) {
-  return new Intl.DateTimeFormat("nb-NO", {
-    timeZone: TIME_ZONE,
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
 
 export function parseRows(raw: unknown): CountRow[] {
@@ -487,7 +470,6 @@ export function buildView(rows: CountRow[], period: ResolvedPeriod): ViewModel {
   let privat = 0;
   let yrkes = 0;
   let ukjent = 0;
-  const points: MapPoint[] = [];
 
   for (const row of rows) {
     const name = row.landName || "Ukjent";
@@ -499,16 +481,6 @@ export function buildView(rows: CountRow[], period: ResolvedPeriod): ViewModel {
     if (row.trafikk === "yrkes") yrkes += 1;
     if (row.trafikk === "ukjent") ukjent += 1;
     carCounts[row.type] += 1;
-
-    if (row.lat != null && row.lng != null) {
-      points.push({
-        lat: row.lat,
-        lng: row.lng,
-        landName: row.landName,
-        typeLabel: row.typeLabel,
-        whenLabel: whenLabel(row.tidspunkt),
-      });
-    }
   }
 
   const total = rows.length;
@@ -540,7 +512,6 @@ export function buildView(rows: CountRow[], period: ResolvedPeriod): ViewModel {
     topVehicleCount,
     countries,
     carTypes: CAR_KEYS.map((key) => ({ label: CAR_LABELS[key], count: carCounts[key] })),
-    points,
     buckets,
     bucketTitle,
   };

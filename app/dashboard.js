@@ -1,10 +1,8 @@
 /**
- * Kart og diagrammer for statistikksiden.
+ * Diagrammer for statistikksiden.
  * Periodefilter og tall ligger i statsModel.ts. update() tegner på nytt.
  */
-import L from "leaflet";
 import Chart from "chart.js/auto";
-import "leaflet/dist/leaflet.css";
 import { buildView } from "./statsModel";
 
 /** Tailwind-farger, samme som i komponentene */
@@ -21,7 +19,6 @@ const THEME = {
 };
 
 const FONT_FALLBACK = "Arial, Helvetica, sans-serif";
-const NORWAY_VIEW = { center: [65, 13], zoom: 4 };
 const CAR_PALETTE = [
   THEME.blue,
   THEME.emerald,
@@ -30,24 +27,6 @@ const CAR_PALETTE = [
   THEME.rose,
   THEME.gray,
 ];
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-function countMarker() {
-  return L.divIcon({
-    className: "leaflet-div-icon count-marker",
-    html: "",
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-    popupAnchor: [0, -10],
-  });
-}
 
 function chartOptions(fontFamily) {
   return {
@@ -91,32 +70,15 @@ function titlePlugin(fontFamily, text) {
 export function createDashboard(root) {
   const fontFamily = getComputedStyle(root).fontFamily || FONT_FALLBACK;
   const commonChartOptions = chartOptions(fontFamily);
-  const mapEl = root.querySelector("[data-dashboard-map]");
   const timeCanvas = root.querySelector('[data-chart="time"]');
   const barCanvas = root.querySelector('[data-chart="bars"]');
   const trafficCanvas = root.querySelector('[data-chart="traffic"]');
   const carTypesCanvas = root.querySelector('[data-chart="car-types"]');
 
-  if (!mapEl || !timeCanvas || !barCanvas || !trafficCanvas || !carTypesCanvas) {
+  if (!timeCanvas || !barCanvas || !trafficCanvas || !carTypesCanvas) {
     console.warn("createDashboard: mangler DOM-elementer");
     return { update() {}, destroy() {} };
   }
-
-  const map = L.map(mapEl, {
-    scrollWheelZoom: true,
-    attributionControl: true,
-  }).setView(NORWAY_VIEW.center, NORWAY_VIEW.zoom);
-
-  L.tileLayer(
-    "https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/{z}/{y}/{x}.png",
-    {
-      attribution: '© <a href="https://www.kartverket.no/">Kartverket</a>',
-      maxZoom: 18,
-    },
-  ).addTo(map);
-
-  const markers = L.layerGroup().addTo(map);
-  const countIcon = countMarker();
 
   Chart.defaults.color = THEME.foreground;
   Chart.defaults.font.family = fontFamily;
@@ -255,30 +217,6 @@ export function createDashboard(root) {
 
   let destroyed = false;
 
-  function renderMarkers(points) {
-    markers.clearLayers();
-    if (points.length === 0) {
-      map.setView(NORWAY_VIEW.center, NORWAY_VIEW.zoom);
-      return;
-    }
-
-    const bounds = [];
-    for (const point of points) {
-      const marker = L.marker([point.lat, point.lng], { icon: countIcon });
-      marker.bindPopup(
-        `<strong>${escapeHtml(point.landName)}</strong><br/>${escapeHtml(point.typeLabel)}<br/>${escapeHtml(point.whenLabel)}`,
-      );
-      markers.addLayer(marker);
-      bounds.push([point.lat, point.lng]);
-    }
-
-    if (bounds.length === 1) {
-      map.setView(bounds[0], 13);
-      return;
-    }
-    map.fitBounds(bounds, { padding: [36, 36], maxZoom: 12 });
-  }
-
   function update(rows, period) {
     if (destroyed) return;
     const view = buildView(rows, period);
@@ -322,9 +260,6 @@ export function createDashboard(root) {
       carTypeChart.data.datasets[0].backgroundColor = [`${THEME.foreground}33`];
     }
     carTypeChart.update();
-
-    renderMarkers(view.points);
-    map.invalidateSize();
   }
 
   function destroy() {
@@ -334,12 +269,7 @@ export function createDashboard(root) {
     barChart.destroy();
     trafficChart.destroy();
     carTypeChart.destroy();
-    map.remove();
   }
-
-  requestAnimationFrame(() => {
-    if (!destroyed) map.invalidateSize();
-  });
 
   return { update, destroy };
 }

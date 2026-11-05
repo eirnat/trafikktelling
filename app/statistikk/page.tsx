@@ -3,7 +3,7 @@ import { DashboardSection } from "../DashboardSection";
 
 export const metadata: Metadata = {
   title: "Statistikk – Trafikktelling",
-  description: "Kart og statistikk fra trafikktellingen.",
+  description: "Statistikk fra trafikktellingen.",
 };
 
 export default function StatistikkPage() {
