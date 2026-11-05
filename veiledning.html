@@ -2,7 +2,7 @@
 <html lang="nb">
   <head>
     <meta charset="utf-8" />
-    <title>Trafikktelling – slik bruker du appen</title>
+    <title>Trafikktelling – digitalt skjema</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -142,7 +142,7 @@
       .body {
         display: flex;
         flex-direction: column;
-        gap: 7.5mm;
+        gap: 6mm;
         padding: 7mm 8mm 0;
       }
 
@@ -173,6 +173,18 @@
         background: var(--blue);
         color: var(--white);
         font-size: 9pt;
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+
+      .tip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 99mm;
+        background: var(--blue-soft);
+        color: var(--blue);
+        padding: 0.6mm 2.4mm;
+        font-size: 8pt;
         font-weight: 600;
         letter-spacing: 0;
       }
@@ -228,6 +240,7 @@
 
       .note {
         margin-top: 3.2mm;
+        margin-bottom: 3.2mm;
         border: 0.3mm solid #bfdbfe;
         border-radius: 3mm;
         background: var(--blue-soft);
@@ -396,7 +409,7 @@
           </div>
           <div>
             <p class="brand-name">Trafikktelling</p>
-            <p class="brand-tag">Slik bruker du appen</p>
+            <p class="brand-tag">Digitalt skjema</p>
           </div>
         </div>
         <div class="head-right">
@@ -410,46 +423,17 @@
 
       <div class="body">
         <p class="lead">
-          Appen registrerer kjøretøy der du står. Legg den på startsiden, tell i
-          tre steg, og les av resultatet under Statistikk.
+          Et digitalt skjema som registrerer trafikk der du står, slik at
+          statistikken kan leses av og lastes ned.
         </p>
 
         <section>
-          <h2><span class="num">1</span> Legg den på startsiden</h2>
-          <div class="cols">
-            <div class="card">
-              <h3>iPhone · Safari</h3>
-              <ol>
-                <li><span>1</span> Åpne trafikktelling.no i Safari.</li>
-                <li>
-                  <span>2</span> Trykk Del-knappen nederst (firkant med pil opp).
-                </li>
-                <li><span>3</span> Velg «Legg til på Hjem-skjerm».</li>
-                <li><span>4</span> Trykk «Legg til» øverst til høyre.</li>
-              </ol>
-            </div>
-            <div class="card">
-              <h3>Android · Chrome</h3>
-              <ol>
-                <li><span>1</span> Åpne trafikktelling.no i Chrome.</li>
-                <li><span>2</span> Trykk menyen med tre prikker, øverst til høyre.</li>
-                <li>
-                  <span>3</span> Velg «Installer app»<br />eller «Legg til på
-                  startskjermen».
-                </li>
-                <li><span>4</span> Bekreft med «Installer» eller «Legg til».</li>
-              </ol>
-            </div>
-          </div>
+          <h2><span class="num">1</span> Registrer et kjøretøy</h2>
           <p class="note">
-            Ikonet heter Trafikktelling og åpnes uten nettleserfelt. På iPhone
-            må lenken åpnes i Safari. Første gang i økten velger du sted.
-            Valget følger med alle tellinger til fanen lukkes.
+            Før første telling velger du sted. Stedet følger med til du trykker
+            «Bytt sted» eller lukker fanen. Et nytt stedvalg starter en ny
+            arbeidsøkt.
           </p>
-        </section>
-
-        <section>
-          <h2><span class="num">2</span> Registrer et kjøretøy</h2>
           <div class="steps">
             <div class="step">
               <p class="kicker"><b>1</b> Land</p>
@@ -491,19 +475,19 @@
           <div class="send">
             <p>
               Når land, kjøretøy og trafikk er valgt, trykk «Bekreft og send».
-              Tidspunkt og valgt sted følger med. Ved feil trykker du «Prøv igjen».
+              Tidspunkt og sted følger med. Ved feil trykker du «Prøv igjen».
             </p>
             <div class="btn">Bekreft og send</div>
           </div>
         </section>
 
         <section>
-          <h2><span class="num">3</span> Se statistikk</h2>
+          <h2><span class="num">2</span> Hent statistikk</h2>
           <div class="stats">
             <p>
-              Fanen Statistikk viser nøkkeltall, kart og diagrammer for tid,
-              land, trafikktype og biltyper. Tallene følger perioden og stedet
-              du velger.
+              Fanen Statistikk viser tall og diagrammer for perioden og stedet
+              du velger. Arbeidsøktene er nummerert, så en feilført bolk kan
+              tas ut samlet.
             </p>
             <div class="periods">
               <span class="on">I dag</span>
@@ -513,8 +497,41 @@
               <span>Egendefinert</span>
             </div>
             <div class="csv-row">
-              <p>CSV-filen inneholder de samme tellingene som vises på skjermen.</p>
+              <p>
+                CSV-filen har de samme tellingene. Kolonnen okt er nummeret på
+                arbeidsøkten.
+              </p>
               <div class="csv">Last ned CSV</div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2><span class="tip">Tips</span> Legg snarvei på startsiden</h2>
+          <p class="note">
+            Du må ikke gjøre dette. En snarvei gjør det lettere å finne skjemaet
+            igjen. På iPhone må lenken åpnes i Safari.
+          </p>
+          <div class="cols">
+            <div class="card">
+              <h3>iPhone · Safari</h3>
+              <ol>
+                <li><span>1</span> Åpne trafikktelling.no i Safari.</li>
+                <li>
+                  <span>2</span> Trykk Del-knappen nederst (firkant med pil opp).
+                </li>
+                <li><span>3</span> Velg «Legg til på Hjem-skjerm».</li>
+                <li><span>4</span> Trykk «Legg til» øverst til høyre.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h3>Android · Chrome</h3>
+              <ol>
+                <li><span>1</span> Åpne trafikktelling.no i Chrome.</li>
+                <li><span>2</span> Trykk menyen med tre prikker, øverst til høyre.</li>
+                <li><span>3</span> Velg «Legg til på startskjermen».</li>
+                <li><span>4</span> Bekreft med «Legg til».</li>
+              </ol>
             </div>
           </div>
         </section>

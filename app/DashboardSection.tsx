@@ -5,7 +5,9 @@ import { GOOGLE_SCRIPT_URL } from "./google-script";
 import { SITES, UNKNOWN_SITE_LABEL, type SiteId } from "./sites";
 import {
   PERIOD_OPTIONS,
+  TIME_ZONE,
   buildView,
+  countBySession,
   countBySite,
   csvFilename,
   filterRows,
@@ -28,6 +30,16 @@ const FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
 const CARD = "rounded-lg border border-slate-200 bg-white shadow-sm";
 const NOTICE = "rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-600";
+
+function formatSessionTime(date: Date) {
+  return new Intl.DateTimeFormat("nb-NO", {
+    timeZone: TIME_ZONE,
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
 
 function shareLabel(count: number, total: number) {
   if (total === 0) return "0 %";
@@ -114,6 +126,7 @@ export function DashboardSection() {
     if (siteFilter === "unknown") return inPeriod.filter((row) => row.sted == null);
     return inPeriod.filter((row) => row.sted === siteFilter);
   }, [inPeriod, siteFilter]);
+  const sessionCounts = useMemo(() => countBySession(filtered), [filtered]);
   const view = useMemo(() => buildView(filtered, period), [filtered, period]);
 
   filteredRef.current = filtered;
@@ -388,6 +401,65 @@ export function DashboardSection() {
                           <td className="px-3 py-2 text-right tabular-nums">
                             {shareLabel(site.count, inPeriod.length)}
                           </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className={`${CARD} px-4 py-4`}>
+              <h3 className="text-base font-bold text-slate-900">Arbeidsøkter</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Hver bolk har et nummer i regnearket. Filtrer kolonnen okt for å ta bort en
+                feilført økt.
+              </p>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-700">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th scope="col" className="px-3 py-2 font-semibold">
+                        Økt
+                      </th>
+                      <th scope="col" className="px-3 py-2 font-semibold">
+                        Sted
+                      </th>
+                      <th scope="col" className="px-3 py-2 font-semibold">
+                        Start
+                      </th>
+                      <th scope="col" className="px-3 py-2 font-semibold">
+                        Slutt
+                      </th>
+                      <th scope="col" className="px-3 py-2 text-right font-semibold">
+                        Antall
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sessionCounts.length === 0 ? (
+                      <tr>
+                        <td className="px-3 py-3" colSpan={5}>
+                          {emptyMessage}
+                        </td>
+                      </tr>
+                    ) : (
+                      sessionCounts.map((session) => (
+                        <tr
+                          key={session.okt ?? "unknown"}
+                          className="border-b border-slate-100"
+                        >
+                          <th scope="row" className="px-3 py-2 font-normal tabular-nums">
+                            {session.okt ?? "Uten økt"}
+                          </th>
+                          <td className="px-3 py-2">{session.stedLabel}</td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {formatSessionTime(session.start)}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {formatSessionTime(session.end)}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums">{session.count}</td>
                         </tr>
                       ))
                     )}

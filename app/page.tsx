@@ -120,6 +120,7 @@ const STEPS = [
 
 const DRAFT_KEY = "trafikktelling-draft-v2";
 const SITE_KEY = "trafikktelling-sted";
+const SESSION_KEY = "trafikktelling-okt";
 
 type Draft = {
   step: number;
@@ -133,6 +134,7 @@ type CountPayload = {
   trafikk: string;
   type: string;
   sted: SiteId;
+  oktNokkel: string;
 };
 
 type FailedSend = {
@@ -152,6 +154,7 @@ function postCount(payload: CountPayload) {
       trafikk: payload.trafikk,
       type: payload.type,
       sted: payload.sted,
+      oktNokkel: payload.oktNokkel,
     }),
   });
 }
@@ -182,6 +185,16 @@ function readDraft(): Draft | null {
   }
 }
 
+function isSessionKey(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+function newSessionKey() {
+  return crypto.randomUUID();
+}
+
 function choiceClass(selected: boolean) {
   return (
     "flex min-h-20 flex-col items-center justify-center rounded-md border-2 px-2 py-3 text-center font-semibold shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-40 " +
@@ -202,6 +215,7 @@ export default function TrafikktellerPage() {
   const [draftReady, setDraftReady] = useState(false);
 
   const [site, setSite] = useState<SiteId | null>(null);
+  const [sessionKey, setSessionKey] = useState<string | null>(null);
   const [siteReady, setSiteReady] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -213,13 +227,20 @@ export default function TrafikktellerPage() {
   const submitLock = useRef(false);
 
   const readyToSend = Boolean(
-    site && selectedCountry && selectedTraffic && selectedCar,
+    site && sessionKey && selectedCountry && selectedTraffic && selectedCar,
   );
 
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem(SITE_KEY);
-      if (stored && isSiteId(stored)) setSite(stored);
+      if (stored && isSiteId(stored)) {
+        setSite(stored);
+        const storedKey = sessionStorage.getItem(SESSION_KEY);
+        const key =
+          storedKey && isSessionKey(storedKey) ? storedKey : newSessionKey();
+        if (key !== storedKey) sessionStorage.setItem(SESSION_KEY, key);
+        setSessionKey(key);
+      }
     } catch {
       // Stedet velges på nytt hvis lagringen ikke kan leses.
     }
@@ -290,9 +311,12 @@ export default function TrafikktellerPage() {
   }
 
   function velgSted(id: SiteId) {
+    const key = newSessionKey();
     setSite(id);
+    setSessionKey(key);
     try {
       sessionStorage.setItem(SITE_KEY, id);
+      sessionStorage.setItem(SESSION_KEY, key);
     } catch {
       // Valget gjelder likevel til siden lastes på nytt.
     }
@@ -300,8 +324,10 @@ export default function TrafikktellerPage() {
 
   function byttSted() {
     setSite(null);
+    setSessionKey(null);
     try {
       sessionStorage.removeItem(SITE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
     } catch {
       // Valget er allerede tømt i skjemaet.
     }
@@ -322,7 +348,9 @@ export default function TrafikktellerPage() {
 
   function sendData() {
     if (submitLock.current) return;
-    if (!site || !selectedCountry || !selectedTraffic || !selectedCar) return;
+    if (!site || !sessionKey || !selectedCountry || !selectedTraffic || !selectedCar) {
+      return;
+    }
 
     submitLock.current = true;
     const payload: CountPayload = {
@@ -330,6 +358,7 @@ export default function TrafikktellerPage() {
       trafikk: selectedTraffic,
       type: selectedCar,
       sted: site,
+      oktNokkel: sessionKey,
     };
     const attempt = ++attemptRef.current;
 

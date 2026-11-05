@@ -47,6 +47,7 @@ export type CountRow = {
   typeLabel: string;
   sted: SiteId | null;
   stedLabel: string;
+  okt: number | null;
   lat: number | null;
   lng: number | null;
 };
@@ -173,6 +174,17 @@ function parseCoord(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function parseOkt(value: unknown): number | null {
+  if (typeof value === "number") {
+    return Number.isInteger(value) && value >= 1 ? value : null;
+  }
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!/^[1-9]\d*$/.test(trimmed)) return null;
+  const n = Number(trimmed);
+  return Number.isSafeInteger(n) ? n : null;
+}
+
 function hasPosition(lat: number | null, lng: number | null) {
   if (lat == null || lng == null) return false;
   if (lat === 0 && lng === 0) return false;
@@ -271,6 +283,7 @@ export function parseRows(raw: unknown): CountRow[] {
       typeLabel: CAR_LABELS[type],
       sted,
       stedLabel: siteLabel(sted),
+      okt: parseOkt(row.okt ?? row.oktnummer ?? row.arbeidsokt),
       lat: hasPosition(lat, lng) ? lat : null,
       lng: hasPosition(lat, lng) ? lng : null,
     });
@@ -345,6 +358,60 @@ export function countBySite(rows: CountRow[]) {
   return [...counts.values()].sort(
     (a, b) => b.count - a.count || a.label.localeCompare(b.label, "nb"),
   );
+}
+
+export type SessionSummary = {
+  okt: number | null;
+  stedLabel: string;
+  start: Date;
+  end: Date;
+  count: number;
+};
+
+export function countBySession(rows: CountRow[]): SessionSummary[] {
+  const groups = new Map<
+    string,
+    {
+      okt: number | null;
+      labels: Set<string>;
+      start: Date;
+      end: Date;
+      count: number;
+    }
+  >();
+
+  for (const row of rows) {
+    const key = row.okt == null ? "" : String(row.okt);
+    const current = groups.get(key);
+    if (!current) {
+      groups.set(key, {
+        okt: row.okt,
+        labels: new Set([row.stedLabel]),
+        start: row.tidspunkt,
+        end: row.tidspunkt,
+        count: 1,
+      });
+      continue;
+    }
+    current.count += 1;
+    current.labels.add(row.stedLabel);
+    if (row.tidspunkt < current.start) current.start = row.tidspunkt;
+    if (row.tidspunkt > current.end) current.end = row.tidspunkt;
+  }
+
+  return [...groups.values()]
+    .map((group) => ({
+      okt: group.okt,
+      stedLabel: [...group.labels].sort((a, b) => a.localeCompare(b, "nb")).join(", "),
+      start: group.start,
+      end: group.end,
+      count: group.count,
+    }))
+    .sort((a, b) => {
+      if (a.okt == null) return 1;
+      if (b.okt == null) return -1;
+      return b.okt - a.okt;
+    });
 }
 
 export function filterRows(rows: CountRow[], period: ResolvedPeriod) {
@@ -542,7 +609,7 @@ function csvCoord(value: number | null) {
 }
 
 export function rowsToCsv(rows: CountRow[]) {
-  const lines = ["tidspunkt;land;trafikk;type;sted;breddegrad;lengdegrad"];
+  const lines = ["tidspunkt;land;trafikk;type;sted;okt;breddegrad;lengdegrad"];
   for (const row of rows) {
     lines.push(
       [
@@ -551,6 +618,7 @@ export function rowsToCsv(rows: CountRow[]) {
         csvField(row.trafikkLabel),
         csvField(row.typeLabel),
         csvField(row.stedLabel),
+        row.okt == null ? "" : String(row.okt),
         csvCoord(row.lat),
         csvCoord(row.lng),
       ].join(";"),
