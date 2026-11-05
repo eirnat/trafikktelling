@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="nb">
+  <head>
+    <meta charset="utf-8" />
+    <title>Trafikktelling – slik bruker du appen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=block"
+    />
+    <style>
+      :root {
+        --ink: #0f172a;
+        --text: #334155;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --mist: #f8fafc;
+        --blue: #2563eb;
+        --blue-soft: #eff6ff;
+        --white: #ffffff;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 210mm;
+        height: 297mm;
+        background: var(--mist);
+        color: var(--text);
+        font-family: "Lexend", Arial, Helvetica, sans-serif;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .sheet {
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
+        background: var(--mist);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4mm;
+        border-bottom: 0.3mm solid var(--line);
+        background: var(--white);
+        padding: 5mm 8mm;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 3mm;
+      }
+
+      .brand-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 11mm;
+        height: 11mm;
+        border-radius: 3mm;
+        background: var(--blue-soft);
+      }
+
+      .brand-icon svg {
+        display: block;
+        width: 7.4mm;
+        height: 7.4mm;
+      }
+
+      .brand-name {
+        color: var(--ink);
+        font-size: 15pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .brand-tag {
+        margin-top: 0.6mm;
+        color: var(--muted);
+        font-size: 9pt;
+      }
+
+      .head-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1.6mm;
+      }
+
+      .url {
+        color: var(--ink);
+        font-size: 10.5pt;
+        font-weight: 600;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0.8mm;
+        border: 0.3mm solid var(--line);
+        border-radius: 99mm;
+        background: var(--mist);
+        padding: 0.8mm;
+      }
+
+      .tabs span {
+        min-width: 22mm;
+        border-radius: 99mm;
+        padding: 1.2mm 3mm;
+        text-align: center;
+        color: var(--muted);
+        font-size: 8pt;
+        font-weight: 600;
+      }
+
+      .tabs .on {
+        background: var(--blue);
+        color: var(--white);
+      }
+
+      .body {
+        display: flex;
+        flex-direction: column;
+        gap: 7.5mm;
+        padding: 7mm 8mm 0;
+      }
+
+      .lead {
+        max-width: 175mm;
+        font-size: 11pt;
+        line-height: 1.45;
+      }
+
+      section h2 {
+        display: flex;
+        align-items: center;
+        gap: 2.6mm;
+        margin-bottom: 2.8mm;
+        color: var(--ink);
+        font-size: 14pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 6.6mm;
+        height: 6.6mm;
+        border-radius: 50%;
+        background: var(--blue);
+        color: var(--white);
+        font-size: 9pt;
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.2mm;
+      }
+
+      .card {
+        border: 0.3mm solid var(--line);
+        border-radius: 3.5mm;
+        background: var(--white);
+      }
+
+      .card h3 {
+        padding: 3mm 3.8mm 0;
+        color: #94a3b8;
+        font-size: 7.5pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .card ol {
+        list-style: none;
+        padding: 1.4mm 3.8mm 3.6mm;
+      }
+
+      .card li {
+        display: grid;
+        grid-template-columns: 5.2mm 1fr;
+        gap: 2.2mm;
+        align-items: start;
+        margin-top: 2.2mm;
+        font-size: 9.75pt;
+        line-height: 1.38;
+      }
+
+      .card li span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 5.2mm;
+        height: 5.2mm;
+        border-radius: 50%;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 7.5pt;
+        font-weight: 600;
+      }
+
+      .note {
+        margin-top: 3.2mm;
+        border: 0.3mm solid #bfdbfe;
+        border-radius: 3mm;
+        background: var(--blue-soft);
+        padding: 2.8mm 3.6mm;
+        font-size: 9.5pt;
+        line-height: 1.4;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 2.6mm;
+      }
+
+      .step {
+        border: 0.3mm solid var(--line);
+        border-radius: 3.5mm;
+        background: var(--white);
+        padding: 3.4mm 3.4mm 3.8mm;
+      }
+
+      .step .kicker {
+        color: #94a3b8;
+        font-size: 7.5pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .step .kicker b {
+        color: var(--blue);
+        letter-spacing: 0;
+      }
+
+      .step .q {
+        margin-top: 1.4mm;
+        font-size: 8.75pt;
+        line-height: 1.35;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.3mm;
+        margin-top: 2.6mm;
+      }
+
+      .chip {
+        border: 0.3mm solid var(--line);
+        border-radius: 1.8mm;
+        padding: 1mm 1.7mm 1.1mm;
+        background: var(--white);
+        color: var(--ink);
+        font-size: 7.75pt;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .chip.more {
+        background: var(--mist);
+        color: var(--muted);
+      }
+
+      .send {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4mm;
+        margin-top: 2.6mm;
+        border: 0.3mm solid var(--line);
+        border-radius: 3.5mm;
+        background: var(--white);
+        padding: 2.6mm 2.6mm 2.6mm 3.6mm;
+      }
+
+      .send p {
+        font-size: 9.5pt;
+        line-height: 1.4;
+      }
+
+      .btn {
+        flex: 0 0 auto;
+        border-radius: 99mm;
+        background: var(--blue);
+        color: var(--white);
+        padding: 2.2mm 4.4mm;
+        font-size: 9pt;
+        font-weight: 600;
+      }
+
+      .stats {
+        border: 0.3mm solid var(--line);
+        border-radius: 3.5mm;
+        background: var(--white);
+        padding: 3.4mm 3.8mm 3.8mm;
+      }
+
+      .stats > p {
+        font-size: 9.75pt;
+        line-height: 1.4;
+      }
+
+      .periods {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.8mm;
+        margin-top: 2.4mm;
+        border: 0.3mm solid var(--line);
+        border-radius: 3mm;
+        background: var(--mist);
+        padding: 0.8mm;
+      }
+
+      .periods span {
+        border-radius: 99mm;
+        padding: 1.2mm 2.4mm;
+        color: var(--muted);
+        font-size: 7.75pt;
+        font-weight: 600;
+      }
+
+      .periods .on {
+        background: var(--blue);
+        color: var(--white);
+      }
+
+      .csv-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4mm;
+        margin-top: 2.6mm;
+      }
+
+      .csv-row p {
+        font-size: 9.5pt;
+        line-height: 1.35;
+      }
+
+      .csv {
+        flex: 0 0 auto;
+        border: 0.3mm solid var(--line);
+        border-radius: 99mm;
+        background: var(--white);
+        color: var(--ink);
+        padding: 1.7mm 3.4mm;
+        font-size: 8.25pt;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="sheet">
+      <header>
+        <div class="brand">
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64">
+              <rect x="6" y="26" width="52" height="16" rx="4" fill="#2563eb" />
+              <path d="M16 26 L22 14 H40 L48 26 Z" fill="#93c5fd" />
+              <rect x="26" y="16" width="12" height="8" rx="1" fill="#ffffff" />
+              <circle cx="18" cy="44" r="6" fill="#0f172a" />
+              <circle cx="18" cy="44" r="2.5" fill="#ffffff" />
+              <circle cx="46" cy="44" r="6" fill="#0f172a" />
+              <circle cx="46" cy="44" r="2.5" fill="#ffffff" />
+            </svg>
+          </div>
+          <div>
+            <p class="brand-name">Trafikktelling</p>
+            <p class="brand-tag">Slik bruker du appen</p>
+          </div>
+        </div>
+        <div class="head-right">
+          <p class="url">trafikktelling.no</p>
+          <div class="tabs" aria-hidden="true">
+            <span class="on">Telling</span>
+            <span>Statistikk</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="body">
+        <p class="lead">
+          Appen registrerer kjøretøy der du står. Legg den på startsiden, tell i
+          tre steg, og les av resultatet under Statistikk.
+        </p>
+
+        <section>
+          <h2><span class="num">1</span> Legg den på startsiden</h2>
+          <div class="cols">
+            <div class="card">
+              <h3>iPhone · Safari</h3>
+              <ol>
+                <li><span>1</span> Åpne trafikktelling.no i Safari.</li>
+                <li>
+                  <span>2</span> Trykk Del-knappen nederst (firkant med pil opp).
+                </li>
+                <li><span>3</span> Velg «Legg til på Hjem-skjerm».</li>
+                <li><span>4</span> Trykk «Legg til» øverst til høyre.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h3>Android · Chrome</h3>
+              <ol>
+                <li><span>1</span> Åpne trafikktelling.no i Chrome.</li>
+                <li><span>2</span> Trykk menyen med tre prikker, øverst til høyre.</li>
+                <li>
+                  <span>3</span> Velg «Installer app»<br />eller «Legg til på
+                  startskjermen».
+                </li>
+                <li><span>4</span> Bekreft med «Installer» eller «Legg til».</li>
+              </ol>
+            </div>
+          </div>
+          <p class="note">
+            Ikonet heter Trafikktelling og åpnes uten nettleserfelt. På iPhone
+            må lenken åpnes i Safari. Tillat posisjon når telefonen spør, så
+            tellingen får et punkt på kartet.
+          </p>
+        </section>
+
+        <section>
+          <h2><span class="num">2</span> Registrer et kjøretøy</h2>
+          <div class="steps">
+            <div class="step">
+              <p class="kicker"><b>1</b> Land</p>
+              <p class="q">Hvilket land har kjøretøyet tilhørighet til?</p>
+              <div class="chips">
+                <span class="chip">Norge</span>
+                <span class="chip">Sverige</span>
+                <span class="chip">Danmark</span>
+                <span class="chip">Tyskland</span>
+                <span class="chip">Polen</span>
+                <span class="chip">Litauen</span>
+                <span class="chip">Finland</span>
+                <span class="chip">Nederland</span>
+                <span class="chip more">Andre land</span>
+              </div>
+            </div>
+            <div class="step">
+              <p class="kicker"><b>2</b> Kjøretøy</p>
+              <p class="q">Hvilken type kjøretøy gjelder tellingen?</p>
+              <div class="chips">
+                <span class="chip">Personbil</span>
+                <span class="chip">Lastebil</span>
+                <span class="chip">Buss</span>
+                <span class="chip">Motorsykkel</span>
+                <span class="chip">Bobil</span>
+                <span class="chip">Annet</span>
+              </div>
+            </div>
+            <div class="step">
+              <p class="kicker"><b>3</b> Trafikk</p>
+              <p class="q">Hvilken type trafikk dreier det seg om?</p>
+              <div class="chips">
+                <span class="chip">Privat</span>
+                <span class="chip">Yrkestrafikk</span>
+                <span class="chip">Ukjent</span>
+              </div>
+            </div>
+          </div>
+          <div class="send">
+            <p>
+              Når land, kjøretøy og trafikk er valgt, trykk «Bekreft og send».
+              Tidspunkt og posisjon følger med. Ved feil trykker du «Prøv igjen».
+            </p>
+            <div class="btn">Bekreft og send</div>
+          </div>
+        </section>
+
+        <section>
+          <h2><span class="num">3</span> Se statistikk</h2>
+          <div class="stats">
+            <p>
+              Fanen Statistikk viser nøkkeltall, kart og diagrammer for tid,
+              land, trafikktype og biltyper. Tallene følger perioden du velger.
+            </p>
+            <div class="periods">
+              <span class="on">I dag</span>
+              <span>Siste 7 dager</span>
+              <span>Denne måneden</span>
+              <span>Hele perioden</span>
+              <span>Egendefinert</span>
+            </div>
+            <div class="csv-row">
+              <p>CSV-filen inneholder de samme tellingene som vises på skjermen.</p>
+              <div class="csv">Last ned CSV</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </article>
+  </body>
+</html>

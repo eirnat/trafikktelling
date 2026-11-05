@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="nb">
+  <head>
+    <meta charset="utf-8" />
+    <title>Trafikktelling — slik fungerer appen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=block"
+    />
+    <style>
+      :root {
+        --ink: #0f172a;
+        --text: #334155;
+        --muted: #64748b;
+        --faint: #94a3b8;
+        --line: #e2e8f0;
+        --mist: #f8fafc;
+        --blue: #2563eb;
+        --blue-soft: #eff6ff;
+        --white: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 210mm;
+        height: 297mm;
+        background: var(--mist);
+        color: var(--text);
+        font-family: "Lexend", Arial, Helvetica, sans-serif;
+        font-weight: 400;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 3.5mm;
+        border-bottom: 1px solid var(--line);
+        background: var(--white);
+        padding: 5mm 10mm;
+      }
+
+      .brand-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 12mm;
+        height: 12mm;
+        border-radius: 3.2mm;
+        background: var(--blue-soft);
+      }
+
+      .brand-icon svg {
+        display: block;
+        width: 8mm;
+        height: 8mm;
+      }
+
+      .brand-name {
+        margin: 0;
+        color: var(--ink);
+        font-size: 17pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .tagline {
+        margin: 0.8mm 0 0;
+        color: var(--muted);
+        font-size: 10pt;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 4mm;
+        padding: 6mm 10mm 7mm;
+      }
+
+      .open {
+        display: grid;
+        grid-template-columns: 28mm 1fr;
+        gap: 6mm;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        background: var(--white);
+        padding: 3.5mm 5mm;
+      }
+
+      .open img {
+        width: 28mm;
+        height: 28mm;
+        display: block;
+      }
+
+      .kicker {
+        margin: 0;
+        color: var(--faint);
+        font-size: 8pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .url {
+        margin: 1.2mm 0 1.8mm;
+        color: var(--ink);
+        font-size: 18pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .open p:last-child,
+      .lead,
+      .note,
+      .confirm {
+        margin: 0;
+        font-size: 10.5pt;
+        line-height: 1.45;
+      }
+
+      section h2 {
+        display: flex;
+        align-items: center;
+        gap: 2.5mm;
+        margin: 0 0 3mm;
+        color: var(--ink);
+        font-size: 14pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      section h2 span {
+        border-radius: 99mm;
+        background: var(--blue-soft);
+        color: var(--blue);
+        padding: 0.8mm 2.4mm;
+        font-size: 8.5pt;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3mm;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        background: var(--white);
+      }
+
+      .card h3 {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin: 0;
+        padding: 3mm 4mm 0;
+        color: var(--ink);
+        font-size: 10.5pt;
+        font-weight: 600;
+      }
+
+      .card h3 em {
+        color: var(--muted);
+        font-style: normal;
+        font-weight: 400;
+        font-size: 8.5pt;
+      }
+
+      ol {
+        margin: 0;
+        padding: 2mm 4mm 3.4mm 8.5mm;
+        font-size: 10.5pt;
+        line-height: 1.45;
+      }
+
+      li + li {
+        margin-top: 1.2mm;
+      }
+
+      .lead {
+        margin-bottom: 3mm;
+      }
+
+      .note {
+        margin-top: 3mm;
+        border: 1px solid #bfdbfe;
+        border-radius: 3mm;
+        background: var(--blue-soft);
+        padding: 3mm 4mm;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr 0.9fr;
+        gap: 2.6mm;
+      }
+
+      .step {
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        background: var(--white);
+        padding: 3.4mm 3.6mm 4mm;
+      }
+
+      .step h3 {
+        margin: 0 0 1.4mm;
+        color: var(--blue);
+        font-size: 8.5pt;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .step p {
+        margin: 0;
+        font-size: 10pt;
+        line-height: 1.4;
+      }
+
+      .sendrow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4mm;
+        margin-top: 3.2mm;
+      }
+
+      .confirm {
+        flex: 1;
+      }
+
+      .send {
+        flex: none;
+        border-radius: 99mm;
+        background: var(--blue);
+        color: var(--white);
+        font-weight: 600;
+        font-size: 10pt;
+        padding: 2.4mm 5mm;
+      }
+
+      .stats {
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        background: var(--white);
+        padding: 4mm 4mm 4.2mm;
+      }
+
+      .stats .lead {
+        margin: 0;
+      }
+
+      .periods {
+        display: flex;
+        gap: 1mm;
+        border: 1px solid var(--line);
+        border-radius: 99mm;
+        background: var(--mist);
+        margin: 3.2mm 0;
+        padding: 1mm;
+      }
+
+      .periods span {
+        flex: 1;
+        border-radius: 99mm;
+        text-align: center;
+        color: var(--muted);
+        font-size: 8.5pt;
+        font-weight: 600;
+        padding: 1.8mm 1mm;
+      }
+
+      .periods .on {
+        background: var(--blue);
+        color: var(--white);
+      }
+
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2mm;
+      }
+
+      .fact {
+        border: 1px solid var(--line);
+        border-radius: 3mm;
+        background: var(--mist);
+        padding: 2.8mm 3mm 3.2mm;
+      }
+
+      .fact b {
+        display: block;
+        color: var(--ink);
+        font-size: 10.5pt;
+        font-weight: 600;
+      }
+
+      .fact span {
+        display: block;
+        margin-top: 1mm;
+        font-size: 9pt;
+        line-height: 1.35;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64">
+          <rect x="6" y="26" width="52" height="16" rx="4" fill="#2563eb" />
+          <path d="M16 26 L22 14 H40 L48 26 Z" fill="#93c5fd" />
+          <rect x="26" y="16" width="12" height="8" rx="1" fill="#ffffff" />
+          <circle cx="18" cy="44" r="6" fill="#0f172a" />
+          <circle cx="18" cy="44" r="2.5" fill="#ffffff" />
+          <circle cx="46" cy="44" r="6" fill="#0f172a" />
+          <circle cx="46" cy="44" r="2.5" fill="#ffffff" />
+        </svg>
+      </div>
+      <div>
+        <p class="brand-name">Trafikktelling</p>
+        <p class="tagline">Slik fungerer appen</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="open">
+        <img src="qr.svg" alt="QR-kode til trafikktelling.no" />
+        <div>
+          <p class="kicker">Åpne siden</p>
+          <p class="url">trafikktelling.no</p>
+          <p>
+            Skann koden, eller skriv adressen i nettleseren. Deretter
+            registrerer du kjøretøy i tre steg.
+          </p>
+        </div>
+      </div>
+
+      <section>
+        <h2><span>01</span> Registrer en telling</h2>
+        <p class="lead">
+          Klokke og GPS-status vises øverst. Velg i tre steg, og avslutt med
+          Bekreft og send.
+        </p>
+        <div class="steps">
+          <article class="step">
+            <h3>1 Land</h3>
+            <p>
+              Norge, Sverige, Danmark, Tyskland, Polen, Litauen, Finland og
+              Nederland. Andre land ligger i listen under.
+            </p>
+          </article>
+          <article class="step">
+            <h3>2 Kjøretøy</h3>
+            <p>Personbil, lastebil, buss, motorsykkel, bobil eller annet.</p>
+          </article>
+          <article class="step">
+            <h3>3 Trafikk</h3>
+            <p>Privat, yrkestrafikk eller ukjent.</p>
+          </article>
+        </div>
+        <div class="sendrow">
+          <p class="confirm">
+            Bekreftelsen er «Tellingen er registrert». Hvis sendingen feiler,
+            trykk Prøv igjen.
+          </p>
+          <div class="send">Bekreft og send</div>
+        </div>
+        <p class="note">
+          Godta posisjon når telefonen spør, så tellingen får et punkt på
+          kartet. Uten posisjon sendes tellingen likevel.
+        </p>
+      </section>
+
+      <section>
+        <h2><span>02</span> Se statistikk</h2>
+        <div class="stats">
+          <p class="lead">
+            Fanen Statistikk viser tallene for perioden du velger. Nøkkeltall,
+            kart og diagrammer følger perioden. CSV-filen inneholder de samme
+            tellingene.
+          </p>
+          <div class="periods">
+            <span>I dag</span>
+            <span>Siste 7 dager</span>
+            <span>Denne måneden</span>
+            <span class="on">Hele perioden</span>
+            <span>Egendefinert</span>
+          </div>
+          <div class="facts">
+            <div class="fact">
+              <b>Nøkkeltall</b>
+              <span>Totalt, privat, yrkestrafikk og ukjent.</span>
+            </div>
+            <div class="fact">
+              <b>Kart</b>
+              <span>Tellinger som har posisjon.</span>
+            </div>
+            <div class="fact">
+              <b>Diagrammer</b>
+              <span>Tid, land, trafikktype og kjøretøy.</span>
+            </div>
+            <div class="fact">
+              <b>CSV</b>
+              <span>Last ned de samme tellingene.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span>Valgfritt</span> Legg appen på startsiden</h2>
+        <div class="cols">
+          <article class="card">
+            <h3>iPhone <em>Safari</em></h3>
+            <ol>
+              <li>Åpne siden i Safari.</li>
+              <li>Trykk Del.</li>
+              <li>Velg Legg til på Hjem-skjerm.</li>
+              <li>Trykk Legg til.</li>
+            </ol>
+          </article>
+          <article class="card">
+            <h3>Android <em>Chrome</em></h3>
+            <ol>
+              <li>Åpne siden i Chrome.</li>
+              <li>Trykk menyen.</li>
+              <li>Velg Legg til på startskjermen, eller Installer app.</li>
+              <li>Bekreft.</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
