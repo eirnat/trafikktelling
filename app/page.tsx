@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { GOOGLE_SCRIPT_URL } from "./google-script";
+import { SITES, isSiteId, siteLabel, type SiteId } from "./sites";
 
 function formatClock(date: Date) {
   return date.toLocaleTimeString("nb-NO", {
@@ -33,34 +34,6 @@ function useLiveClock() {
   }, []);
 
   return time;
-}
-
-function useGeolocation() {
-  const [gps, setGps] = useState<{ lat: number | null; lng: number | null }>({
-    lat: null,
-    lng: null,
-  });
-  const [gpsStatus, setGpsStatus] = useState<"pending" | "success" | "failure">(
-    "pending"
-  );
-
-  useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      queueMicrotask(() => setGpsStatus("failure"));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGps({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setGpsStatus("success");
-      },
-      () => {
-        setGpsStatus("failure");
-      }
-    );
-  }, []);
-
-  return { gps, gpsStatus };
 }
 
 const FLAG_COUNTRIES = [
@@ -146,6 +119,7 @@ const STEPS = [
 ] as const;
 
 const DRAFT_KEY = "trafikktelling-draft-v2";
+const SITE_KEY = "trafikktelling-sted";
 
 type Draft = {
   step: number;
@@ -158,8 +132,7 @@ type CountPayload = {
   land: string;
   trafikk: string;
   type: string;
-  lat: number | null;
-  lng: number | null;
+  sted: SiteId;
 };
 
 type FailedSend = {
@@ -178,8 +151,7 @@ function postCount(payload: CountPayload) {
       land: payload.land,
       trafikk: payload.trafikk,
       type: payload.type,
-      lat: payload.lat,
-      lng: payload.lng,
+      sted: payload.sted,
     }),
   });
 }
@@ -221,7 +193,6 @@ function choiceClass(selected: boolean) {
 
 export default function TrafikktellerPage() {
   const liveTime = useLiveClock();
-  const { gps, gpsStatus } = useGeolocation();
   const allCountries = useCountryOptions();
 
   const [step, setStep] = useState(0);
@@ -229,6 +200,9 @@ export default function TrafikktellerPage() {
   const [selectedTraffic, setSelectedTraffic] = useState<string | null>(null);
   const [selectedCar, setSelectedCar] = useState<string | null>(null);
   const [draftReady, setDraftReady] = useState(false);
+
+  const [site, setSite] = useState<SiteId | null>(null);
+  const [siteReady, setSiteReady] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -238,7 +212,19 @@ export default function TrafikktellerPage() {
   const failedIdRef = useRef<number | null>(null);
   const submitLock = useRef(false);
 
-  const readyToSend = Boolean(selectedCountry && selectedTraffic && selectedCar);
+  const readyToSend = Boolean(
+    site && selectedCountry && selectedTraffic && selectedCar,
+  );
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(SITE_KEY);
+      if (stored && isSiteId(stored)) setSite(stored);
+    } catch {
+      // Stedet velges på nytt hvis lagringen ikke kan leses.
+    }
+    setSiteReady(true);
+  }, []);
 
   useEffect(() => {
     const draft = readDraft();
@@ -303,6 +289,24 @@ export default function TrafikktellerPage() {
     setStep(2);
   }
 
+  function velgSted(id: SiteId) {
+    setSite(id);
+    try {
+      sessionStorage.setItem(SITE_KEY, id);
+    } catch {
+      // Valget gjelder likevel til siden lastes på nytt.
+    }
+  }
+
+  function byttSted() {
+    setSite(null);
+    try {
+      sessionStorage.removeItem(SITE_KEY);
+    } catch {
+      // Valget er allerede tømt i skjemaet.
+    }
+  }
+
   function resetForm() {
     const empty: Draft = { step: 0, country: null, traffic: null, car: null };
     setStep(0);
@@ -318,15 +322,14 @@ export default function TrafikktellerPage() {
 
   function sendData() {
     if (submitLock.current) return;
-    if (!selectedCountry || !selectedTraffic || !selectedCar) return;
+    if (!site || !selectedCountry || !selectedTraffic || !selectedCar) return;
 
     submitLock.current = true;
     const payload: CountPayload = {
       land: selectedCountry,
       trafikk: selectedTraffic,
       type: selectedCar,
-      lat: gps.lat,
-      lng: gps.lng,
+      sted: site,
     };
     const attempt = ++attemptRef.current;
 
@@ -363,13 +366,6 @@ export default function TrafikktellerPage() {
     }
   }
 
-  const gpsLabel =
-    gpsStatus === "pending"
-      ? "Henter posisjon"
-      : gpsStatus === "success"
-        ? "Posisjon hentet"
-        : "GPS ikke tilgjengelig";
-
   const summary = [
     countryName(selectedCountry),
     CAR_TYPES.find((c) => c.key === selectedCar)?.label,
@@ -385,14 +381,50 @@ export default function TrafikktellerPage() {
       <div className="sr-only" role="status" aria-live="polite">
         {statusMessage}
       </div>
-      <div className="flex justify-end border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-500 sm:px-6">
-        <div className="text-right">
-          <div className="tabular-nums">Nå: {liveTime}</div>
-          <div>{gpsLabel}</div>
-        </div>
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-500 sm:px-6">
+        {site ? (
+          <div className="flex min-w-0 items-center gap-2 text-sm text-slate-700">
+            <span className="truncate font-semibold">{siteLabel(site)}</span>
+            <button
+              type="button"
+              onClick={byttSted}
+              className="shrink-0 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              Bytt sted
+            </button>
+          </div>
+        ) : (
+          <span />
+        )}
+        <div className="shrink-0 tabular-nums">Nå: {liveTime}</div>
       </div>
 
       <section className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        {siteReady && !site ? (
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Hvor teller du?
+            </h2>
+            <p className="mt-2 text-base text-slate-600">
+              Velg stedet én gang. Det følger med alle tellinger i denne økten.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {SITES.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={choiceClass(false) + " min-h-24 px-4 text-base sm:text-lg"}
+                  onClick={() => velgSted(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {site ? (
+        <>
         <div
           className="grid grid-cols-3 gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm"
           role="tablist"
@@ -553,6 +585,8 @@ export default function TrafikktellerPage() {
             )}
           </div>
         )}
+        </>
+        ) : null}
       </section>
 
       {readyToSend && (

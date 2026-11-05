@@ -3,6 +3,8 @@
  * Alle kalendergrenser er i Europe/Oslo.
  */
 
+import { isSiteId, siteLabel, type SiteId } from "./sites";
+
 export const TIME_ZONE = "Europe/Oslo";
 
 export const CAR_KEYS = [
@@ -43,6 +45,8 @@ export type CountRow = {
   trafikkLabel: string;
   type: CarType;
   typeLabel: string;
+  sted: SiteId | null;
+  stedLabel: string;
   lat: number | null;
   lng: number | null;
 };
@@ -271,6 +275,8 @@ export function parseRows(raw: unknown): CountRow[] {
     const type = normalizeCarType(row.type);
     const lat = parseCoord(row.breddegrad ?? row.lat);
     const lng = parseCoord(row.lengdegrad ?? row.lng ?? row.longitude ?? row.lon);
+    const stedRaw = String(row.sted ?? row.site ?? "").trim();
+    const sted = isSiteId(stedRaw) ? stedRaw : null;
 
     rows.push({
       tidspunkt,
@@ -280,6 +286,8 @@ export function parseRows(raw: unknown): CountRow[] {
       trafikkLabel: trafficLabel(trafikk),
       type,
       typeLabel: CAR_LABELS[type],
+      sted,
+      stedLabel: siteLabel(sted),
       lat: hasPosition(lat, lng) ? lat : null,
       lng: hasPosition(lat, lng) ? lng : null,
     });
@@ -341,6 +349,19 @@ export function resolvePeriod(
     to: endOfOsloDay(today.y, today.m, today.d),
     incomplete: false,
   };
+}
+
+export function countBySite(rows: CountRow[]) {
+  const counts = new Map<string, { id: SiteId | null; label: string; count: number }>();
+  for (const row of rows) {
+    const key = row.sted ?? "";
+    const current = counts.get(key);
+    if (current) current.count += 1;
+    else counts.set(key, { id: row.sted, label: row.stedLabel, count: 1 });
+  }
+  return [...counts.values()].sort(
+    (a, b) => b.count - a.count || a.label.localeCompare(b.label, "nb"),
+  );
 }
 
 export function filterRows(rows: CountRow[], period: ResolvedPeriod) {
@@ -550,7 +571,7 @@ function csvCoord(value: number | null) {
 }
 
 export function rowsToCsv(rows: CountRow[]) {
-  const lines = ["tidspunkt;land;trafikk;type;breddegrad;lengdegrad"];
+  const lines = ["tidspunkt;land;trafikk;type;sted;breddegrad;lengdegrad"];
   for (const row of rows) {
     lines.push(
       [
@@ -558,6 +579,7 @@ export function rowsToCsv(rows: CountRow[]) {
         csvField(row.landName),
         csvField(row.trafikkLabel),
         csvField(row.typeLabel),
+        csvField(row.stedLabel),
         csvCoord(row.lat),
         csvCoord(row.lng),
       ].join(";"),

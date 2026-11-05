@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GOOGLE_SCRIPT_URL } from "./google-script";
+import { SITES, UNKNOWN_SITE_LABEL, type SiteId } from "./sites";
 import {
   PERIOD_OPTIONS,
   buildView,
+  countBySite,
   csvFilename,
   filterRows,
   formatPeriodLabel,
@@ -90,12 +92,28 @@ export function DashboardSection() {
   const [periodId, setPeriodId] = useState<PeriodId>("all");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
+  const [siteFilter, setSiteFilter] = useState<"all" | SiteId | "unknown">("all");
 
   const period = useMemo(
     () => resolvePeriod(periodId, customFrom, customTo),
     [periodId, customFrom, customTo],
   );
-  const filtered = useMemo(() => filterRows(rows, period), [rows, period]);
+  const inPeriod = useMemo(() => filterRows(rows, period), [rows, period]);
+  const siteCounts = useMemo(() => countBySite(inPeriod), [inPeriod]);
+  const showUnknownSite =
+    siteFilter === "unknown" || inPeriod.some((row) => row.sted == null);
+  const siteOptions: { id: "all" | SiteId | "unknown"; label: string }[] = [
+    { id: "all", label: "Alle steder" },
+    ...SITES,
+  ];
+  if (showUnknownSite) {
+    siteOptions.push({ id: "unknown", label: UNKNOWN_SITE_LABEL });
+  }
+  const filtered = useMemo(() => {
+    if (siteFilter === "all") return inPeriod;
+    if (siteFilter === "unknown") return inPeriod.filter((row) => row.sted == null);
+    return inPeriod.filter((row) => row.sted === siteFilter);
+  }, [inPeriod, siteFilter]);
   const view = useMemo(() => buildView(filtered, period), [filtered, period]);
 
   filteredRef.current = filtered;
@@ -178,7 +196,9 @@ export function DashboardSection() {
   const periodLabel = formatPeriodLabel(period);
   const emptyMessage = period.incomplete
     ? "Velg fra- og til-dato"
-    : "Ingen tellinger i perioden";
+    : siteFilter !== "all" && inPeriod.length > 0
+      ? "Ingen tellinger for valgt sted"
+      : "Ingen tellinger i perioden";
 
   return (
     <section
@@ -274,6 +294,33 @@ export function DashboardSection() {
                 </label>
                 <p className="pb-2 text-sm text-slate-500">{periodLabel}</p>
               </div>
+
+              <div
+                role="radiogroup"
+                aria-label="Sted"
+                className="flex flex-wrap gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1"
+              >
+                {siteOptions.map((option) => {
+                  const active = siteFilter === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setSiteFilter(option.id)}
+                      className={
+                        `rounded-full px-3 py-2 text-sm font-semibold transition-colors ${FOCUS} ` +
+                        (active
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-slate-600 hover:bg-white hover:text-slate-900")
+                      }
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -302,6 +349,51 @@ export function DashboardSection() {
                     : undefined
                 }
               />
+            </div>
+
+            <div className={`${CARD} px-4 py-4`}>
+              <h3 className="text-base font-bold text-slate-900">Tellinger per sted</h3>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-700">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th scope="col" className="px-3 py-2 font-semibold">
+                        Sted
+                      </th>
+                      <th scope="col" className="px-3 py-2 text-right font-semibold">
+                        Antall
+                      </th>
+                      <th scope="col" className="px-3 py-2 text-right font-semibold">
+                        Andel
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {siteCounts.length === 0 ? (
+                      <tr>
+                        <td className="px-3 py-3" colSpan={3}>
+                          {emptyMessage}
+                        </td>
+                      </tr>
+                    ) : (
+                      siteCounts.map((site) => (
+                        <tr
+                          key={site.id ?? "unknown"}
+                          className="border-b border-slate-100"
+                        >
+                          <th scope="row" className="px-3 py-2 font-normal">
+                            {site.label}
+                          </th>
+                          <td className="px-3 py-2 text-right tabular-nums">{site.count}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">
+                            {shareLabel(site.count, inPeriod.length)}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {view.total === 0 ? (
