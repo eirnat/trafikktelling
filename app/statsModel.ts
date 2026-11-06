@@ -200,6 +200,7 @@ function normalizeLand(value: unknown) {
 
 function countryName(code: string) {
   if (!code) return "Ukjent";
+  if (code === "XX") return "Annet land";
   try {
     return regionNames.of(code) || code;
   } catch {

@@ -47,54 +47,18 @@ const FLAG_COUNTRIES = [
   { name: "Nederland", emoji: "🇳🇱", code: "NL" },
 ];
 
-const EXCLUDED_REGION_CODES = new Set([
-  "AC",
-  "CP",
-  "CQ",
-  "DG",
-  "EA",
-  "EU",
-  "EZ",
-  "IC",
-  "QO",
-  "TA",
-  "UN",
-  "XA",
-  "XB",
-  "ZZ",
-]);
+const OTHER_COUNTRY = { name: "Annet land", emoji: "🌐", code: "XX" };
 
-function getAllCountryOptions() {
-  const regionNames = new Intl.DisplayNames(["nb"], { type: "region" });
-  const countries: { code: string; name: string }[] = [];
-
-  for (let first = 65; first <= 90; first += 1) {
-    for (let second = 65; second <= 90; second += 1) {
-      const code = String.fromCharCode(first, second);
-      if (EXCLUDED_REGION_CODES.has(code)) continue;
-
-      const name = regionNames.of(code);
-      if (!name || name === code) continue;
-      if (name.toLowerCase().startsWith("ukjent")) continue;
-
-      countries.push({ code, name });
-    }
+function countryLabel(code: string | null) {
+  if (!code) return null;
+  if (code === OTHER_COUNTRY.code) return OTHER_COUNTRY.name;
+  const known = FLAG_COUNTRIES.find((country) => country.code === code)?.name;
+  if (known) return known;
+  try {
+    return new Intl.DisplayNames(["nb"], { type: "region" }).of(code) || code;
+  } catch {
+    return code;
   }
-
-  countries.sort((a, b) => a.name.localeCompare(b.name, "nb"));
-  return countries;
-}
-
-function useCountryOptions() {
-  const [countries, setCountries] = useState<{ code: string; name: string }[]>(
-    []
-  );
-
-  useEffect(() => {
-    setCountries(getAllCountryOptions());
-  }, []);
-
-  return countries;
 }
 
 const TRAFFIC_TYPES = [
@@ -206,7 +170,6 @@ function choiceClass(selected: boolean) {
 
 export default function TrafikktellerPage() {
   const liveTime = useLiveClock();
-  const allCountries = useCountryOptions();
 
   const [step, setStep] = useState(0);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -275,15 +238,6 @@ export default function TrafikktellerPage() {
     }
   }, [step, selectedCountry, selectedTraffic, selectedCar]);
 
-  function countryName(code: string | null) {
-    if (!code) return null;
-    return (
-      FLAG_COUNTRIES.find((c) => c.code === code)?.name ??
-      allCountries.find((c) => c.code === code)?.name ??
-      code
-    );
-  }
-
   function canOpenStep(index: number) {
     if (index === 0) return true;
     if (index === 1) return Boolean(selectedCountry);
@@ -293,12 +247,6 @@ export default function TrafikktellerPage() {
   function velgLand(code: string) {
     setSelectedCountry(code);
     setStep(1);
-  }
-
-  function velgLandDropdown(event: React.ChangeEvent<HTMLSelectElement>) {
-    const code = event.target.value;
-    setSelectedCountry(code || null);
-    if (code) setStep(1);
   }
 
   function velgTrafikk(key: string) {
@@ -396,7 +344,7 @@ export default function TrafikktellerPage() {
   }
 
   const summary = [
-    countryName(selectedCountry),
+    countryLabel(selectedCountry),
     CAR_TYPES.find((c) => c.key === selectedCar)?.label,
     TRAFFIC_TYPES.find((t) => t.key === selectedTraffic)?.label,
   ].filter(Boolean);
@@ -521,23 +469,23 @@ export default function TrafikktellerPage() {
                     <span className="mt-2 text-xs font-normal sm:text-sm">{c.name}</span>
                   </button>
                 ))}
-              </div>
-              <label className="mt-6 block max-w-sm text-sm">
-                <span className="mb-1 block font-semibold text-slate-600">Andre land</span>
-                <select
-                  className="w-full rounded-md border-2 border-slate-200 bg-white px-3 py-2 text-base text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                  value={selectedCountry ?? ""}
-                  onChange={velgLandDropdown}
-                  aria-label="Velg land"
+                <button
+                  type="button"
+                  aria-label={OTHER_COUNTRY.name}
+                  aria-pressed={selectedCountry === OTHER_COUNTRY.code}
+                  className={
+                    choiceClass(selectedCountry === OTHER_COUNTRY.code) + " col-span-4"
+                  }
+                  onClick={() => velgLand(OTHER_COUNTRY.code)}
                 >
-                  <option value="">Velg land</option>
-                  {allCountries.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  <span className="text-2xl leading-none sm:text-3xl" aria-hidden="true">
+                    {OTHER_COUNTRY.emoji}
+                  </span>
+                  <span className="mt-2 text-xs font-normal sm:text-sm">
+                    {OTHER_COUNTRY.name}
+                  </span>
+                </button>
+              </div>
             </div>
           )}
 
